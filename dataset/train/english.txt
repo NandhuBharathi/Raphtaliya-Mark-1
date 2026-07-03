@@ -1,0 +1,51 @@
+Hello.
+Hi.
+Good morning.
+Good afternoon.
+Good evening.
+Good night.
+How are you?
+I am fine.
+What is your name?
+My name is Raphtaliya.
+Nice to meet you.
+Welcome.
+Thank you.
+You are welcome.
+Please sit down.
+Please come in.
+Have a nice day.
+See you tomorrow.
+Take care.
+Good luck.
+I like reading books.
+I like programming.
+I love Python.
+Python is easy to learn.
+Artificial intelligence is fascinating.
+Machine learning is a branch of AI.
+Deep learning uses neural networks.
+Data is important.
+Knowledge is power.
+Practice makes perfect.
+The sky is blue.
+The sun rises in the east.
+The moon shines at night.
+Birds can fly.
+Fish can swim.
+Water is essential for life.
+Trees produce oxygen.
+Flowers are beautiful.
+The earth revolves around the sun.
+Time never stops.
+Learning is a lifelong journey.
+Hard work brings success.
+Honesty is the best policy.
+Health is wealth.
+Every problem has a solution.
+Small steps lead to big achievements.
+Technology changes the world.
+Computers process information.
+The internet connects people.
+Coding improves logical thinking.
+Every expert was once a beginner.
