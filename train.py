@@ -1,32 +1,61 @@
 
+from raphtaliya.pipeline import DataPipeline
 from raphtaliya.model import RaphtaliyaMark1
 from raphtaliya.trainer import Trainer
+from raphtaliya.dataloader import LanguageDataset
 
-import torch
+from torch.utils.data import DataLoader
 
-VOCAB_SIZE = 100
-EMBED_DIM = 256
-NUM_HEADS = 8
-HIDDEN_DIM = 1024
-NUM_LAYERS = 4
-MAX_SEQUENCE_LENGTH = 512
+
+pipeline = DataPipeline(
+    dataset_path="dataset/train",
+    sequence_length=8
+)
+
+data = pipeline.build()
+
+
+dataset = LanguageDataset(
+    data["inputs"].tolist(),
+    data["targets"].tolist()
+)
+
+loader = DataLoader(
+    dataset,
+    batch_size=4,
+    shuffle=True
+)
+
 
 model = RaphtaliyaMark1(
-    vocab_size=VOCAB_SIZE,
-    embedding_dim=EMBED_DIM,
-    num_heads=NUM_HEADS,
-    hidden_dim=HIDDEN_DIM,
-    num_layers=NUM_LAYERS,
-    max_sequence_length=MAX_SEQUENCE_LENGTH
+    vocab_size=data["vocabulary"].size(),
+    embedding_dim=256,
+    num_heads=8,
+    hidden_dim=1024,
+    num_layers=4,
+    max_sequence_length=512
 )
 
 trainer = Trainer(model)
 
-for epoch in range(10):
 
-    inputs = torch.randint(0, VOCAB_SIZE, (8, 32))
-    targets = torch.randint(0, VOCAB_SIZE, (8, 32))
+EPOCHS = 10
 
-    loss = trainer.train_step(inputs, targets)
+for epoch in range(EPOCHS):
 
-    print(f"Epoch {epoch + 1} | Loss: {loss:.4f}")
+    total_loss = 0.0
+
+    for inputs, targets in loader:
+
+        loss = trainer.train_step(
+            inputs,
+            targets
+        )
+
+        total_loss += loss
+
+    average_loss = total_loss / len(loader)
+
+    print(
+        f"Epoch {epoch + 1} | Loss: {average_loss:.4f}"
+    )
