@@ -8,7 +8,6 @@ class InferenceEngine:
 
         self.model = model
         self.tokenizer = tokenizer
-
         self.model.eval()
 
     @torch.no_grad()
@@ -24,9 +23,31 @@ class InferenceEngine:
         logits = self.model(inputs)
 
         next_token = torch.argmax(
-            logits[0, -1]
+            logits[0, -1],
+            dim=-1
         ).item()
 
-        return self.tokenizer.vocabulary.get_word(
-            next_token
-        )
+        return next_token
+
+    @torch.no_grad()
+    def generate(self, text, max_new_tokens=20):
+
+        token_ids = self.tokenizer.encode(text)
+
+        for _ in range(max_new_tokens):
+
+            inputs = torch.tensor(
+                [token_ids],
+                dtype=torch.long
+            )
+
+            logits = self.model(inputs)
+
+            next_token = torch.argmax(
+                logits[0, -1],
+                dim=-1
+            ).item()
+
+            token_ids.append(next_token)
+
+        return self.tokenizer.decode(token_ids)
