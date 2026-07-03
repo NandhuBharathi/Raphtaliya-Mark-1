@@ -8,8 +8,13 @@ class InferenceEngine:
 
         self.model = model
         self.tokenizer = tokenizer
-
         self.model.eval()
+
+        self.special_tokens = {
+            "<PAD>",
+            "<BOS>",
+            "<UNK>"
+        }
 
     @torch.no_grad()
     def generate(
@@ -38,19 +43,28 @@ class InferenceEngine:
                 k=min(top_k, logits.size(-1))
             )
 
-            probs = torch.softmax(
-                values,
-                dim=-1
-            )
+            probs = torch.softmax(values, dim=-1)
 
-            sampled = torch.multinomial(
-                probs,
-                num_samples=1
-            )
+            next_token = None
 
-            next_token = indices[
-                sampled.item()
-            ].item()
+            while next_token is None:
+
+                sampled = torch.multinomial(
+                    probs,
+                    num_samples=1
+                ).item()
+
+                candidate = indices[sampled].item()
+
+                word = self.tokenizer.vocabulary.get_word(candidate)
+
+                if word == "<EOS>":
+                    return self.tokenizer.decode(token_ids)
+
+                if word in self.special_tokens:
+                    continue
+
+                next_token = candidate
 
             token_ids.append(next_token)
 
