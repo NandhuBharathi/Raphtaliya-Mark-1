@@ -1,5 +1,7 @@
 
 from raphtaliya.dataset import Dataset
+from raphtaliya.cleaner import TextCleaner
+from raphtaliya.sentence_splitter import SentenceSplitter
 from raphtaliya.vocabulary import Vocabulary
 from raphtaliya.tokenizer import Tokenizer
 from raphtaliya.sequence import SequenceBuilder
@@ -17,7 +19,20 @@ class DataPipeline:
 
         dataset = Dataset(self.dataset_path)
 
-        texts = dataset.load()
+        books = dataset.load()
+
+        cleaner = TextCleaner()
+        splitter = SentenceSplitter()
+
+        texts = []
+
+        for book in books:
+
+            cleaned = cleaner.clean(book)
+
+            sentences = splitter.split(cleaned)
+
+            texts.extend(sentences)
 
         vocabulary = Vocabulary()
         vocabulary.build(texts)
