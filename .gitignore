@@ -220,3 +220,4 @@ __marimo__/
 !echo "" >> .gitignore
 !echo "# Models" >> .gitignore
 !echo "checkpoints/*.pt" >> .gitignore
+checkpoints/*.pt
