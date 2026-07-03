@@ -8,29 +8,17 @@ class InferenceEngine:
 
         self.model = model
         self.tokenizer = tokenizer
+
         self.model.eval()
 
     @torch.no_grad()
-    def predict_next(self, text):
-
-        token_ids = self.tokenizer.encode(text)
-
-        inputs = torch.tensor(
-            [token_ids],
-            dtype=torch.long
-        )
-
-        logits = self.model(inputs)
-
-        next_token = torch.argmax(
-            logits[0, -1],
-            dim=-1
-        ).item()
-
-        return next_token
-
-    @torch.no_grad()
-    def generate(self, text, max_new_tokens=20):
+    def generate(
+        self,
+        text,
+        max_new_tokens=20,
+        temperature=1.0,
+        top_k=10
+    ):
 
         token_ids = self.tokenizer.encode(text)
 
@@ -43,10 +31,26 @@ class InferenceEngine:
 
             logits = self.model(inputs)
 
-            next_token = torch.argmax(
-                logits[0, -1],
+            logits = logits[0, -1] / temperature
+
+            values, indices = torch.topk(
+                logits,
+                k=min(top_k, logits.size(-1))
+            )
+
+            probs = torch.softmax(
+                values,
                 dim=-1
-            ).item()
+            )
+
+            sampled = torch.multinomial(
+                probs,
+                num_samples=1
+            )
+
+            next_token = indices[
+                sampled.item()
+            ].item()
 
             token_ids.append(next_token)
 
