@@ -4,27 +4,23 @@ from pathlib import Path
 
 class Dataset:
 
-    def __init__(self, folder):
+    def __init__(self, dataset_path):
 
-        self.folder = Path(folder)
+        self.dataset_path = Path(dataset_path)
 
     def load(self):
 
-        texts = []
+        books = []
 
-        for file in sorted(self.folder.rglob("*.txt")):
+        for file in sorted(self.dataset_path.glob("*.txt")):
 
-            with open(file, "r", encoding="utf-8") as f:
+            with open(
+                file,
+                "r",
+                encoding="utf-8",
+                errors="ignore"
+            ) as f:
 
-                for line in f:
+                books.append(f.read())
 
-                    line = line.strip()
-
-                    if line:
-                        texts.append(line)
-
-        return texts
-
-    def __len__(self):
-
-        return len(self.load())
+        return books

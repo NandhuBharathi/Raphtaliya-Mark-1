@@ -1,5 +1,6 @@
 
 from raphtaliya.dataset import Dataset
+from raphtaliya.document_splitter import DocumentSplitter
 from raphtaliya.cleaner import TextCleaner
 from raphtaliya.sentence_splitter import SentenceSplitter
 from raphtaliya.vocabulary import Vocabulary
@@ -21,16 +22,19 @@ class DataPipeline:
 
         books = dataset.load()
 
+        document_splitter = DocumentSplitter()
         cleaner = TextCleaner()
-        splitter = SentenceSplitter()
+        sentence_splitter = SentenceSplitter()
 
         texts = []
 
         for book in books:
 
-            cleaned = cleaner.clean(book)
+            story = document_splitter.split(book)
 
-            sentences = splitter.split(cleaned)
+            story = cleaner.clean(story)
+
+            sentences = sentence_splitter.split(story)
 
             texts.extend(sentences)
 

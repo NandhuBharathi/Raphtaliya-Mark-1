@@ -26,43 +26,26 @@ class DocumentSplitter:
         if end:
             text = text[:end.start()]
 
-        # Remove common front matter
-        patterns = [
-            r"The Project Gutenberg eBook.*?\n",
-            r"This eBook.*?\n",
-            r"by .*?\n",
-            r"THE MILLENNIUM FULCRUM EDITION.*?\n",
-            r"Contents.*?(?=CHAPTER|BOOK|PART)",
-        ]
-
-        for pattern in patterns:
-            text = re.sub(
-                pattern,
-                "",
-                text,
-                flags=re.DOTALL | re.IGNORECASE
-            )
-
         # Remove illustration tags
-        text = re.sub(
-            r"\[.*?\]",
-            "",
-            text
+        text = re.sub(r"\[.*?\]", "", text)
+
+        # Find all Chapter I occurrences
+        chapters = list(
+            re.finditer(
+                r"CHAPTER\s+I\b",
+                text,
+                flags=re.IGNORECASE
+            )
         )
+
+        # Skip Contents page
+        if len(chapters) >= 2:
+            text = text[chapters[1].start():]
 
         # Normalize spaces
         text = text.replace("\r", "")
 
-        text = re.sub(
-            r"\n\s*\n",
-            "\n",
-            text
-        )
-
-        text = re.sub(
-            r"[ \t]+",
-            " ",
-            text
-        )
+        text = re.sub(r"[ \t]+", " ", text)
+        text = re.sub(r"\n\s*\n", "\n", text)
 
         return text.strip()
