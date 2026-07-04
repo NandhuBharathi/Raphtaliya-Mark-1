@@ -221,3 +221,4 @@ __marimo__/
 !echo "# Models" >> .gitignore
 !echo "checkpoints/*.pt" >> .gitignore
 checkpoints/*.pt
+*.zip
