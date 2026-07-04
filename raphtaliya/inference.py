@@ -12,7 +12,9 @@ class InferenceEngine:
     ):
 
         self.device = device or (
-            "cuda" if torch.cuda.is_available() else "cpu"
+            "cuda"
+            if torch.cuda.is_available()
+            else "cpu"
         )
 
         self.model = model.to(self.device)
@@ -20,11 +22,10 @@ class InferenceEngine:
 
         self.model.eval()
 
-        self.special_tokens = {
-            "<PAD>",
-            "<BOS>",
-            "<UNK>"
-        }
+        self.pad_id = self.tokenizer.token_to_id("<PAD>")
+        self.unk_id = self.tokenizer.token_to_id("<UNK>")
+        self.bos_id = self.tokenizer.token_to_id("<BOS>")
+        self.eos_id = self.tokenizer.token_to_id("<EOS>")
 
     @torch.no_grad()
     def generate(
@@ -54,7 +55,10 @@ class InferenceEngine:
                 k=min(top_k, logits.size(-1))
             )
 
-            probs = torch.softmax(values, dim=-1)
+            probs = torch.softmax(
+                values,
+                dim=-1
+            )
 
             next_token = None
 
@@ -62,24 +66,32 @@ class InferenceEngine:
 
                 sampled = torch.multinomial(
                     probs,
-                    num_samples=1
+                    1
                 ).item()
 
-                candidate = indices[sampled].item()
+                candidate = indices[
+                    sampled
+                ].item()
 
-                word = self.tokenizer.vocabulary.get_word(candidate)
+                if candidate == self.eos_id:
+                    return self.tokenizer.decode(
+                        token_ids
+                    )
 
-                if word == "<EOS>":
-                    return self.tokenizer.decode(token_ids)
-
-                if word in self.special_tokens:
+                if candidate in (
+                    self.pad_id,
+                    self.unk_id,
+                    self.bos_id
+                ):
                     continue
 
                 next_token = candidate
 
             token_ids.append(next_token)
 
-        return self.tokenizer.decode(token_ids)
+        return self.tokenizer.decode(
+            token_ids
+        )
 
     @torch.no_grad()
     def predict_next_token(
@@ -106,7 +118,10 @@ class InferenceEngine:
             k=min(top_k, logits.size(-1))
         )
 
-        probs = torch.softmax(values, dim=-1)
+        probs = torch.softmax(
+            values,
+            dim=-1
+        )
 
         predictions = []
 
@@ -115,23 +130,36 @@ class InferenceEngine:
             indices.tolist()
         ):
 
-            predictions.append({
-                "token": self.tokenizer.vocabulary.get_word(index),
-                "probability": round(probability, 4)
-            })
+            predictions.append(
+                {
+                    "token": self.tokenizer.id_to_token(index),
+                    "probability": round(
+                        probability,
+                        4
+                    )
+                }
+            )
 
         return predictions
 
     def model_info(self):
 
         return {
-            "model": self.model.__class__.__name__,
-            "device": str(self.device),
-            "vocabulary_size": self.tokenizer.vocab_size(),
-            "parameters": sum(
-                p.numel()
-                for p in self.model.parameters()
-            )
+
+            "model":
+                self.model.__class__.__name__,
+
+            "device":
+                str(self.device),
+
+            "vocabulary_size":
+                self.tokenizer.vocab_size(),
+
+            "parameters":
+                sum(
+                    p.numel()
+                    for p in self.model.parameters()
+                )
         }
 
 
@@ -141,5 +169,5 @@ if __name__ == "__main__":
 
     show_upgrade(
         module="Inference",
-        version="V3.0"
+        version="V4.0"
     )

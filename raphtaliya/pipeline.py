@@ -1,19 +1,25 @@
+
 from raphtaliya.dataset import Dataset
 from raphtaliya.document_splitter import DocumentSplitter
 from raphtaliya.cleaner import TextCleaner
 from raphtaliya.sentence_splitter import SentenceSplitter
-from raphtaliya.vocabulary import Vocabulary
-from raphtaliya.tokenizer import Tokenizer
+from raphtaliya.tokenizer import RaphtaliyaTokenizer
 from raphtaliya.sequence import SequenceBuilder
 from raphtaliya.padding import Padder
 
 
 class DataPipeline:
 
-    def __init__(self, dataset_path, sequence_length=32):
+    def __init__(
+        self,
+        dataset_path,
+        sequence_length=32,
+        tokenizer_path="tokenizer/tokenizer.json"
+    ):
 
         self.dataset_path = dataset_path
         self.sequence_length = sequence_length
+        self.tokenizer_path = tokenizer_path
 
     def build(self):
 
@@ -37,10 +43,9 @@ class DataPipeline:
 
             texts.extend(sentences)
 
-        vocabulary = Vocabulary()
-        vocabulary.build(texts)
-
-        tokenizer = Tokenizer(vocabulary)
+        tokenizer = RaphtaliyaTokenizer(
+            self.tokenizer_path
+        )
 
         builder = SequenceBuilder(
             tokenizer,
@@ -59,15 +64,14 @@ class DataPipeline:
         print("=" * 60)
         print(f"Dataset Path      : {self.dataset_path}")
         print(f"Documents         : {len(books)}")
-        print(f"Sentences         : {len(texts)}")
-        print(f"Vocabulary Size   : {vocabulary.size()}")
+        print(f"Sentences         : {len(texts):,}")
+        print(f"Vocabulary Size   : {tokenizer.vocab_size():,}")
         print(f"Sequence Length   : {self.sequence_length}")
-        print(f"Training Samples  : {len(inputs)}")
+        print(f"Training Samples  : {len(inputs):,}")
         print("=" * 60)
 
         return {
             "texts": texts,
-            "vocabulary": vocabulary,
             "tokenizer": tokenizer,
             "inputs": inputs,
             "targets": targets
@@ -80,5 +84,5 @@ if __name__ == "__main__":
 
     show_upgrade(
         module="Pipeline",
-        version="V2.0"
+        version="V3.0"
     )
