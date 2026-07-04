@@ -1,4 +1,3 @@
-
 from raphtaliya.dataset import Dataset
 from raphtaliya.document_splitter import DocumentSplitter
 from raphtaliya.cleaner import TextCleaner
@@ -55,6 +54,17 @@ class DataPipeline:
         inputs = padder.pad(inputs)
         targets = padder.pad(targets)
 
+        print("=" * 60)
+        print("Raphtaliya Mark-1 Data Pipeline")
+        print("=" * 60)
+        print(f"Dataset Path      : {self.dataset_path}")
+        print(f"Documents         : {len(books)}")
+        print(f"Sentences         : {len(texts)}")
+        print(f"Vocabulary Size   : {vocabulary.size()}")
+        print(f"Sequence Length   : {self.sequence_length}")
+        print(f"Training Samples  : {len(inputs)}")
+        print("=" * 60)
+
         return {
             "texts": texts,
             "vocabulary": vocabulary,
@@ -62,3 +72,13 @@ class DataPipeline:
             "inputs": inputs,
             "targets": targets
         }
+
+
+if __name__ == "__main__":
+
+    from raphtaliya.utils import show_upgrade
+
+    show_upgrade(
+        module="Pipeline",
+        version="V2.0"
+    )
