@@ -1,3 +1,4 @@
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -9,15 +10,20 @@ class Trainer:
         self,
         model,
         learning_rate=3e-4,
-        gradient_clip=1.0
+        gradient_clip=1.0,
+        device=None
     ):
 
-        self.model = model
+        self.device = device or (
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
+
+        self.model = model.to(self.device)
 
         self.loss_fn = nn.CrossEntropyLoss()
 
         self.optimizer = optim.AdamW(
-            model.parameters(),
+            self.model.parameters(),
             lr=learning_rate
         )
 
@@ -34,6 +40,9 @@ class Trainer:
     ):
 
         self.model.train()
+
+        input_ids = input_ids.to(self.device)
+        target_ids = target_ids.to(self.device)
 
         self.optimizer.zero_grad()
 
@@ -72,6 +81,9 @@ class Trainer:
 
         self.model.eval()
 
+        input_ids = input_ids.to(self.device)
+        target_ids = target_ids.to(self.device)
+
         logits = self.model(input_ids)
 
         vocab_size = logits.size(-1)
@@ -97,13 +109,29 @@ class Trainer:
         return {
             "training_steps": self.training_steps,
             "learning_rate": self.learning_rate(),
-            "average_loss": round(average, 4)
+            "average_loss": round(average, 4),
+            "device": str(self.device)
         }
 
     def reset_statistics(self):
 
         self.training_steps = 0
         self.loss_history.clear()
+
+    def model_parameters(self):
+
+        return sum(
+            p.numel()
+            for p in self.model.parameters()
+        )
+
+    def train_mode(self):
+
+        self.model.train()
+
+    def eval_mode(self):
+
+        self.model.eval()
 
 
 if __name__ == "__main__":
@@ -112,5 +140,5 @@ if __name__ == "__main__":
 
     show_upgrade(
         module="Trainer",
-        version="V2.0"
+        version="V3.0"
     )

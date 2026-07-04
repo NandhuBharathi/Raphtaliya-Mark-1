@@ -1,12 +1,23 @@
+
 import torch
 
 
 class InferenceEngine:
 
-    def __init__(self, model, tokenizer):
+    def __init__(
+        self,
+        model,
+        tokenizer,
+        device=None
+    ):
 
-        self.model = model
+        self.device = device or (
+            "cuda" if torch.cuda.is_available() else "cpu"
+        )
+
+        self.model = model.to(self.device)
         self.tokenizer = tokenizer
+
         self.model.eval()
 
         self.special_tokens = {
@@ -26,13 +37,12 @@ class InferenceEngine:
 
         token_ids = self.tokenizer.encode(text)
 
-        generated = 0
-
         for _ in range(max_new_tokens):
 
             inputs = torch.tensor(
                 [token_ids],
-                dtype=torch.long
+                dtype=torch.long,
+                device=self.device
             )
 
             logits = self.model(inputs)
@@ -68,10 +78,10 @@ class InferenceEngine:
                 next_token = candidate
 
             token_ids.append(next_token)
-            generated += 1
 
         return self.tokenizer.decode(token_ids)
 
+    @torch.no_grad()
     def predict_next_token(
         self,
         text,
@@ -83,25 +93,27 @@ class InferenceEngine:
 
         inputs = torch.tensor(
             [token_ids],
-            dtype=torch.long
+            dtype=torch.long,
+            device=self.device
         )
 
-        with torch.no_grad():
+        logits = self.model(inputs)
 
-            logits = self.model(inputs)
+        logits = logits[0, -1] / temperature
 
-            logits = logits[0, -1] / temperature
+        values, indices = torch.topk(
+            logits,
+            k=min(top_k, logits.size(-1))
+        )
 
-            values, indices = torch.topk(
-                logits,
-                k=min(top_k, logits.size(-1))
-            )
-
-            probs = torch.softmax(values, dim=-1)
+        probs = torch.softmax(values, dim=-1)
 
         predictions = []
 
-        for probability, index in zip(probs.tolist(), indices.tolist()):
+        for probability, index in zip(
+            probs.tolist(),
+            indices.tolist()
+        ):
 
             predictions.append({
                 "token": self.tokenizer.vocabulary.get_word(index),
@@ -114,7 +126,12 @@ class InferenceEngine:
 
         return {
             "model": self.model.__class__.__name__,
-            "vocabulary_size": self.tokenizer.vocab_size()
+            "device": str(self.device),
+            "vocabulary_size": self.tokenizer.vocab_size(),
+            "parameters": sum(
+                p.numel()
+                for p in self.model.parameters()
+            )
         }
 
 
@@ -124,5 +141,5 @@ if __name__ == "__main__":
 
     show_upgrade(
         module="Inference",
-        version="V2.0"
+        version="V3.0"
     )
