@@ -1,5 +1,5 @@
-
 from collections import Counter
+import json
 
 from raphtaliya.normalizer import Normalizer
 from raphtaliya.pretokenizer import PreTokenizer
@@ -74,3 +74,60 @@ class Vocabulary:
     def size(self):
 
         return len(self.word_to_id)
+
+    def contains(self, token):
+
+        return token in self.word_to_id
+
+    def most_common(self, n=20):
+
+        return self.counter.most_common(n)
+
+    def statistics(self):
+
+        return {
+            "vocabulary_size": self.size(),
+            "unique_tokens": len(self.counter),
+            "special_tokens": self.special_tokens
+        }
+
+    def save(self, filename):
+
+        data = {
+            "word_to_id": self.word_to_id,
+            "special_tokens": self.special_tokens
+        }
+
+        with open(filename, "w", encoding="utf-8") as file:
+
+            json.dump(
+                data,
+                file,
+                ensure_ascii=False,
+                indent=4
+            )
+
+    def load(self, filename):
+
+        with open(filename, "r", encoding="utf-8") as file:
+
+            data = json.load(file)
+
+        self.word_to_id = data["word_to_id"]
+
+        self.special_tokens = data["special_tokens"]
+
+        self.id_to_word = {
+            int(index): token
+            for token, index in self.word_to_id.items()
+        }
+
+
+if __name__ == "__main__":
+
+    from raphtaliya.utils import show_upgrade
+
+    show_upgrade(
+        module="Vocabulary",
+        version="V2.0"
+    )
