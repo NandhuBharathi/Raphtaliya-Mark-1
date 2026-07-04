@@ -6,48 +6,40 @@ class TextCleaner:
 
     def clean(self, text):
 
-        # Remove Gutenberg header
-        start_patterns = [
-            "*** START OF",
-            "CHAPTER I.",
-            "CHAPTER I\n",
-            "CHAPTER I\r\n"
-        ]
+        # -----------------------------
+        # Remove Project Gutenberg Header
+        # -----------------------------
+        start_marker = "*** START OF"
 
-        start_index = 0
+        start = text.find(start_marker)
 
-        for pattern in start_patterns:
-
-            index = text.find(pattern)
-
-            if index != -1:
-                start_index = index
-                break
-
-        text = text[start_index:]
+        if start != -1:
+            start = text.find("\n", start)
+            if start != -1:
+                text = text[start + 1:]
 
 
-        # Remove Gutenberg footer
-        end_patterns = [
+        # -----------------------------
+        # Remove Project Gutenberg Footer
+        # -----------------------------
+        end_markers = [
             "*** END OF",
             "End of the Project Gutenberg",
             "End of Project Gutenberg"
         ]
 
-        end_index = len(text)
+        for marker in end_markers:
 
-        for pattern in end_patterns:
+            end = text.find(marker)
 
-            index = text.find(pattern)
-
-            if index != -1:
-                end_index = index
+            if end != -1:
+                text = text[:end]
                 break
 
-        text = text[:end_index]
 
-
-        # Remove illustration tags
+        # -----------------------------
+        # Remove Illustration Tags
+        # -----------------------------
         text = re.sub(
             r"\[.*?\]",
             "",
@@ -55,36 +47,47 @@ class TextCleaner:
         )
 
 
-        # Remove Contents page
+        # -----------------------------
+        # Remove Contents Page
+        # -----------------------------
         text = re.sub(
-            r"Contents.*?CHAPTER I",
-            "CHAPTER I",
+            r"Contents.*?(CHAPTER|ACT I|BOOK I|PART I)",
+            r"\1",
             text,
-            flags=re.DOTALL
+            flags=re.DOTALL | re.IGNORECASE
         )
 
 
-        # Remove chapter headings
-        text = re.sub(
-            r"CHAPTER\s+[IVXLC]+\.*",
-            "",
-            text
-        )
-
-
-        # Normalize spaces
+        # -----------------------------
+        # Remove Multiple Blank Lines
+        # -----------------------------
         text = text.replace("\r", "")
 
         text = re.sub(
-            r"\n\s*\n",
-            "\n",
+            r"\n{3,}",
+            "\n\n",
             text
         )
 
+
+        # -----------------------------
+        # Normalize Spaces
+        # -----------------------------
         text = re.sub(
             r"[ \t]+",
             " ",
             text
         )
 
+
         return text.strip()
+
+
+if __name__ == "__main__":
+
+    from raphtaliya.utils import show_upgrade
+
+    show_upgrade(
+        module="Cleaner",
+        version="V2.0"
+    )
