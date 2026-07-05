@@ -1,14 +1,16 @@
+import os
 import torch
+
+from huggingface_hub import hf_hub_download
 
 from raphtaliya.model import RaphtaliyaMark1
 from raphtaliya.tokenizer import RaphtaliyaTokenizer
 from raphtaliya.inference import InferenceEngine
-from raphtaliya.checkpoint import CheckpointManager
 
 
-# ==========================================
+# ============================================================
 # Device
-# ==========================================
+# ============================================================
 
 device = torch.device(
     "cuda" if torch.cuda.is_available() else "cpu"
@@ -21,20 +23,73 @@ print("Device :", device)
 print("=" * 60)
 
 
-# ==========================================
-# Tokenizer
-# ==========================================
+# ============================================================
+# Download / Load Checkpoint
+# ============================================================
+
+CHECKPOINT_DIR = "checkpoints"
+TOKENIZER_DIR = "tokenizer"
+
+os.makedirs(CHECKPOINT_DIR, exist_ok=True)
+os.makedirs(TOKENIZER_DIR, exist_ok=True)
+
+
+checkpoint_path = os.path.join(
+    CHECKPOINT_DIR,
+    "best.pt"
+)
+
+if not os.path.exists(checkpoint_path):
+
+    print("Downloading model from Hugging Face...")
+
+    checkpoint_path = hf_hub_download(
+        repo_id="nandhakumarms/Raphtaliya-Mark-1",
+        filename="best.pt",
+        local_dir=CHECKPOINT_DIR
+    )
+
+    print("Download Completed.")
+
+else:
+
+    print("Using Local Checkpoint.")
+
+
+tokenizer_path = os.path.join(
+    TOKENIZER_DIR,
+    "tokenizer.json"
+)
+
+if not os.path.exists(tokenizer_path):
+
+    print("Downloading Tokenizer...")
+
+    tokenizer_path = hf_hub_download(
+        repo_id="nandhakumarms/Raphtaliya-Mark-1",
+        filename="tokenizer/tokenizer.json",
+        local_dir=TOKENIZER_DIR
+    )
+
+    print("Tokenizer Downloaded.")
+
+else:
+
+    print("Using Local Tokenizer.")
+# ============================================================
+# Load Tokenizer
+# ============================================================
 
 tokenizer = RaphtaliyaTokenizer(
-    "tokenizer/tokenizer.json"
+    tokenizer_path=tokenizer_path
 )
 
 vocab_size = tokenizer.vocab_size()
 
 
-# ==========================================
-# Model
-# ==========================================
+# ============================================================
+# Create Model
+# ============================================================
 
 model = RaphtaliyaMark1(
     vocab_size=vocab_size,
@@ -46,27 +101,31 @@ model = RaphtaliyaMark1(
 )
 
 
-# ==========================================
+# ============================================================
 # Load Checkpoint
-# ==========================================
+# ============================================================
 
-checkpoint = CheckpointManager()
-
-info = checkpoint.load(
-    model=model,
-    filename="best.pt",
-    device=device
+checkpoint = torch.load(
+    checkpoint_path,
+    map_location=device
 )
 
-print("Checkpoint Loaded")
-print("Epoch :", info["epoch"])
-print("Loss  :", info["loss"])
+model.load_state_dict(
+    checkpoint["model_state_dict"]
+)
+
+model.to(device)
+model.eval()
+
+print("\nCheckpoint Loaded Successfully")
+print(f"Epoch : {checkpoint['epoch']}")
+print(f"Loss  : {checkpoint['loss']:.4f}")
 print("=" * 60)
 
 
-# ==========================================
-# Inference Engine
-# ==========================================
+# ============================================================
+# Create Inference Engine
+# ============================================================
 
 engine = InferenceEngine(
     model=model,
@@ -75,17 +134,20 @@ engine = InferenceEngine(
 )
 
 
-# ==========================================
-# Chat Loop
-# ==========================================
+# ============================================================
+# Interactive Chat
+# ============================================================
 
-print("Type 'exit' to quit.\n")
+print("🦊 Raphtaliya is Ready!")
+print("Type 'exit' to quit.")
+print("=" * 60)
 
 while True:
 
-    prompt = input("You : ")
+    prompt = input("\nYou : ")
 
-    if prompt.lower() == "exit":
+    if prompt.lower() in ["exit", "quit"]:
+        print("\nGoodbye!")
         break
 
     response = engine.generate(
@@ -95,4 +157,4 @@ while True:
         top_k=20
     )
 
-    print(f"\nRaphtaliya : {response}\n")
+    print(f"\nRaphtaliya : {response}")
