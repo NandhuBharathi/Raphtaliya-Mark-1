@@ -1,6 +1,13 @@
 
 import torch
 
+from raphtaliya.config import (
+    MAX_NEW_TOKENS,
+    TEMPERATURE,
+    TOP_K,
+    TOP_P
+)
+
 
 class InferenceEngine:
 
@@ -31,9 +38,10 @@ class InferenceEngine:
     def generate(
         self,
         text,
-        max_new_tokens=20,
-        temperature=1.0,
-        top_k=10
+        max_new_tokens=MAX_NEW_TOKENS,
+        temperature=TEMPERATURE,
+        top_k=TOP_K,
+        top_p=TOP_P
     ):
 
         token_ids = self.tokenizer.encode(text)
@@ -97,8 +105,9 @@ class InferenceEngine:
     def predict_next_token(
         self,
         text,
-        temperature=1.0,
-        top_k=10
+        temperature=TEMPERATURE,
+        top_k=TOP_K,
+        top_p=TOP_P
     ):
 
         token_ids = self.tokenizer.encode(text)
@@ -169,5 +178,5 @@ if __name__ == "__main__":
 
     show_upgrade(
         module="Inference",
-        version="V4.0"
+        version="V5.0"
     )

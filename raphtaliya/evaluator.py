@@ -3,6 +3,10 @@ import math
 import torch
 import torch.nn as nn
 
+from raphtaliya.config import DEFAULT_DEVICE
+
+from raphtaliya.config import DEFAULT_DEVICE
+
 
 class Evaluator:
 
@@ -13,7 +17,7 @@ class Evaluator:
     ):
 
         self.device = device or (
-            "cuda" if torch.cuda.is_available() else "cpu"
+            DEFAULT_DEVICE if torch.cuda.is_available() else 'cpu'
         )
 
         self.model = model.to(self.device)
@@ -77,5 +81,5 @@ if __name__ == "__main__":
 
     show_upgrade(
         module="Evaluator",
-        version="V2.0"
+        version="V3.0"
     )

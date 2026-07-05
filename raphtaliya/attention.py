@@ -3,6 +3,8 @@ import math
 import torch
 import torch.nn as nn
 
+from raphtaliya.config import DROPOUT
+
 
 class MultiHeadAttention(nn.Module):
 
@@ -10,7 +12,7 @@ class MultiHeadAttention(nn.Module):
         self,
         embedding_dim,
         num_heads,
-        dropout=0.1
+        dropout=DROPOUT
     ):
 
         super().__init__()
@@ -90,17 +92,30 @@ class MultiHeadAttention(nn.Module):
                 float("-inf")
             )
 
-        attention = torch.softmax(
-            scores,
-            dim=-1
-        )
+        if hasattr(torch.nn.functional, "scaled_dot_product_attention"):
 
-        attention = self.dropout(attention)
+            context = torch.nn.functional.scaled_dot_product_attention(
+                Q,
+                K,
+                V,
+                attn_mask=causal_mask,
+                dropout_p=self.dropout.p if self.training else 0.0,
+                is_causal=True
+            )
 
-        context = torch.matmul(
-            attention,
-            V
-        )
+        else:
+
+            attention = torch.softmax(
+                scores,
+                dim=-1
+            )
+
+            attention = self.dropout(attention)
+
+            context = torch.matmul(
+                attention,
+                V
+            )
 
         context = context.transpose(
             1,

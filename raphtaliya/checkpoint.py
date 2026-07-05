@@ -25,7 +25,7 @@ class CheckpointManager:
     ):
 
         checkpoint = {
-            "version": "2.0",
+            "version": "3.0",
             "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "epoch": epoch,
             "loss": loss,
@@ -139,6 +139,37 @@ class CheckpointManager:
             device=device
         )
 
+
+
+    def resume(
+        self,
+        model,
+        optimizer=None,
+        device="cpu"
+    ):
+
+        if self.exists("best.pt"):
+
+            checkpoint = self.load_best(
+                model=model,
+                optimizer=optimizer,
+                device=device
+            )
+
+            print("=" * 60)
+            print("Checkpoint Resumed")
+            print("=" * 60)
+            print(f"Epoch : {checkpoint['epoch']}")
+            print(f"Loss  : {checkpoint['loss']:.4f}")
+            print("=" * 60)
+
+            return checkpoint
+
+        print("No checkpoint found. Starting fresh.")
+
+        return None
+
+
     def exists(self, filename):
 
         return self._path(filename).exists()
@@ -192,6 +223,8 @@ class CheckpointManager:
                 "model_state_dict" in checkpoint
                 and
                 "epoch" in checkpoint
+                and
+                "version" in checkpoint
             )
 
         except Exception:
@@ -205,5 +238,5 @@ if __name__ == "__main__":
 
     show_upgrade(
         module="Checkpoint",
-        version="V2.0"
+        version="V3.0"
     )

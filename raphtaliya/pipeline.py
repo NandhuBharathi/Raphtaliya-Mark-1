@@ -7,14 +7,24 @@ from raphtaliya.tokenizer import RaphtaliyaTokenizer
 from raphtaliya.sequence import SequenceBuilder
 from raphtaliya.padding import Padder
 
+from raphtaliya.config import (
+    SEQUENCE_LENGTH,
+    TOKENIZER_PATH
+)
+
+from raphtaliya.config import (
+    SEQUENCE_LENGTH,
+    TOKENIZER_PATH
+)
+
 
 class DataPipeline:
 
     def __init__(
         self,
         dataset_path,
-        sequence_length=32,
-        tokenizer_path="tokenizer/tokenizer.json"
+        sequence_length=SEQUENCE_LENGTH,
+        tokenizer_path=TOKENIZER_PATH
     ):
 
         self.dataset_path = dataset_path
@@ -41,7 +51,17 @@ class DataPipeline:
 
             sentences = sentence_splitter.split(story)
 
+            sentences = [
+                s.strip()
+                for s in sentences
+                if s.strip()
+            ]
+
             texts.extend(sentences)
+
+        texts = list(dict.fromkeys(texts))
+
+        texts = list(dict.fromkeys(texts))
 
         tokenizer = RaphtaliyaTokenizer(
             self.tokenizer_path
@@ -84,5 +104,5 @@ if __name__ == "__main__":
 
     show_upgrade(
         module="Pipeline",
-        version="V3.0"
+        version="V4.0"
     )
