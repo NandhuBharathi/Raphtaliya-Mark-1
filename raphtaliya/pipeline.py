@@ -22,6 +22,11 @@ from raphtaliya.config import (
     TOKENIZER_PATH
 )
 
+from raphtaliya.config import (
+    SEQUENCE_LENGTH,
+    TOKENIZER_PATH
+)
+
 
 class DataPipeline:
 
@@ -63,6 +68,8 @@ class DataPipeline:
             ]
 
             texts.extend(sentences)
+
+        texts = list(dict.fromkeys(texts))
 
         texts = list(dict.fromkeys(texts))
 

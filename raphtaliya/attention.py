@@ -7,6 +7,8 @@ from raphtaliya.config import DROPOUT
 
 from raphtaliya.config import DROPOUT
 
+from raphtaliya.config import DROPOUT
+
 
 class MultiHeadAttention(nn.Module):
 

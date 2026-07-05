@@ -14,6 +14,7 @@ from raphtaliya.evaluator import Evaluator
 from raphtaliya.checkpoint import CheckpointManager
 from raphtaliya.inference import InferenceEngine
 from raphtaliya.dataloader import LanguageDataset
+from raphtaliya.config import *
 
 
 # ==========================================
@@ -51,8 +52,8 @@ print("=" * 60)
 # ==========================================
 
 pipeline = DataPipeline(
-    dataset_path="dataset/train",
-    sequence_length=64
+    dataset_path=DATASET_PATH,
+    sequence_length=SEQUENCE_LENGTH
 )
 
 data = pipeline.build()
@@ -62,7 +63,7 @@ dataset = LanguageDataset(
     data["targets"].tolist()
 )
 
-train_size = int(len(dataset) * 0.9)
+train_size = int(len(dataset) * (1 - VALIDATION_SPLIT))
 validation_size = len(dataset) - train_size
 
 train_dataset, validation_dataset = random_split(
@@ -73,13 +74,13 @@ train_dataset, validation_dataset = random_split(
 
 train_loader = DataLoader(
     train_dataset,
-    batch_size=8,
+    batch_size=BATCH_SIZE,
     shuffle=True
 )
 
 validation_loader = DataLoader(
     validation_dataset,
-    batch_size=8,
+    batch_size=BATCH_SIZE,
     shuffle=False
 )
 
@@ -99,11 +100,11 @@ print("=" * 60)
 
 model = RaphtaliyaMark1(
     vocab_size=vocab_size,
-    embedding_dim=256,
-    num_heads=8,
-    hidden_dim=1024,
-    num_layers=4,
-    max_sequence_length=512
+    embedding_dim=EMBEDDING_DIM,
+    num_heads=NUM_HEADS,
+    hidden_dim=HIDDEN_DIM,
+    num_layers=NUM_LAYERS,
+    max_sequence_length=MAX_SEQUENCE_LENGTH
 )
 
 trainer = Trainer(
@@ -126,7 +127,6 @@ print("=" * 60)
 # Training Configuration
 # ==========================================
 
-EPOCHS = 10
 
 best_train_loss = float("inf")
 best_validation_loss = float("inf")
@@ -266,7 +266,7 @@ checkpoint.save(
     optimizer=trainer.optimizer,
     epoch=EPOCHS,
     loss=best_validation_loss,
-    filename="mark1_102books.pt",
+    filename=FINAL_CHECKPOINT,
     metadata={
         "vocabulary": vocab_size,
         "epochs": EPOCHS,
