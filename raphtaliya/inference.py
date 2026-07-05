@@ -8,6 +8,13 @@ from raphtaliya.config import (
     TOP_P
 )
 
+from raphtaliya.config import (
+    MAX_NEW_TOKENS,
+    TEMPERATURE,
+    TOP_K,
+    TOP_P
+)
+
 
 class InferenceEngine:
 

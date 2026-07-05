@@ -170,6 +170,37 @@ class CheckpointManager:
         return None
 
 
+
+
+    def resume(
+        self,
+        model,
+        optimizer=None,
+        device="cpu"
+    ):
+
+        if self.exists("best.pt"):
+
+            checkpoint = self.load_best(
+                model=model,
+                optimizer=optimizer,
+                device=device
+            )
+
+            print("=" * 60)
+            print("Checkpoint Resumed")
+            print("=" * 60)
+            print(f"Epoch : {checkpoint['epoch']}")
+            print(f"Loss  : {checkpoint['loss']:.4f}")
+            print("=" * 60)
+
+            return checkpoint
+
+        print("No checkpoint found. Starting fresh.")
+
+        return None
+
+
     def exists(self, filename):
 
         return self._path(filename).exists()

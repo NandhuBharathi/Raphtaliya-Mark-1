@@ -5,6 +5,8 @@ import torch.nn as nn
 
 from raphtaliya.config import DROPOUT
 
+from raphtaliya.config import DROPOUT
+
 
 class MultiHeadAttention(nn.Module):
 

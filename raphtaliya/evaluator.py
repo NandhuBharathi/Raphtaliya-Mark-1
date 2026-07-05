@@ -7,6 +7,8 @@ from raphtaliya.config import DEFAULT_DEVICE
 
 from raphtaliya.config import DEFAULT_DEVICE
 
+from raphtaliya.config import DEFAULT_DEVICE
+
 
 class Evaluator:
 
